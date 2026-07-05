@@ -71,7 +71,15 @@
 
     @if(session('success'))
     <div class="flex items-start gap-2 bg-green-50 border border-green-200 text-green-600 rounded-xl px-4 py-3 text-sm mb-6">
-      <span class="mt-0.5">✓</span><span>{{ session('success') }}</span>
+      <i class="bi bi-check-circle-fill mt-0.5"></i>
+      <span>{{ session('success') }}</span>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-6">
+      <i class="bi bi-x-circle-fill mt-0.5"></i>
+      <span>{{ session('error') }}</span>
     </div>
     @endif
 
@@ -135,27 +143,105 @@
       </div>
     </section>
 
-    {{-- Riwayat Pengajuan (ringkas) --}}
+    {{-- Riwayat Pengajuan --}}
     <section>
-      <h2 class="text-base font-semibold text-slate-800 mb-4">Riwayat Pengajuan Terbaru</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold text-slate-800">Riwayat Pengajuan</h2>
+        <a href="{{ route('mahasiswa.riwayat') }}" class="text-xs text-[#4f8ef7] font-medium hover:underline">
+          Lihat Semua
+        </a>
+      </div>
+
       <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
-              <th class="text-left font-medium px-5 py-3">Jenis Surat</th>
-              <th class="text-left font-medium px-5 py-3">Tanggal Pengajuan</th>
-              <th class="text-left font-medium px-5 py-3">Status</th>
-              <th class="text-left font-medium px-5 py-3">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr>
-              <td colspan="4" class="px-5 py-10 text-center text-slate-300">
-                Belum ada riwayat pengajuan surat.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        @if(isset($pengajuan) && $pengajuan->isEmpty())
+        <div class="text-center py-12">
+          <i class="bi bi-inbox text-5xl text-slate-300"></i>
+          <p class="text-slate-400 mt-3">Belum ada riwayat pengajuan surat.</p>
+          <p class="text-slate-400 text-sm">Silakan ajukan surat pertama Anda di atas.</p>
+        </div>
+        @elseif(isset($pengajuan))
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+                <th class="text-left font-medium px-5 py-3 w-16">No</th>
+                <th class="text-left font-medium px-5 py-3">Nama</th>
+                <th class="text-left font-medium px-5 py-3">NIM</th>
+                <th class="text-left font-medium px-5 py-3">Jenis Surat</th>
+                <th class="text-left font-medium px-5 py-3">Tanggal Pengajuan</th>
+                <th class="text-left font-medium px-5 py-3">Status</th>
+                <th class="text-left font-medium px-5 py-3">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @foreach($pengajuan as $index => $item)
+              <tr class="hover:bg-slate-50/70 transition">
+                <td class="px-5 py-3.5 text-center font-medium text-slate-400">{{ $index + 1 }}</td>
+                <td class="px-5 py-3.5 font-medium text-slate-800">{{ $item->nama }}</td>
+                <td class="px-5 py-3.5 font-mono text-slate-600">{{ $item->nim }}</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm 
+                      {{ $item->jenis === 'aktif' ? 'bg-blue-50 text-blue-600' : ($item->jenis === 'magang' ? 'bg-emerald-50 text-emerald-600' : 'bg-purple-50 text-purple-600') }}">
+                      <i class="bi {{ $item->jenis === 'aktif' ? 'bi-person-check' : ($item->jenis === 'magang' ? 'bi-briefcase' : 'bi-file-earmark-text') }}"></i>
+                    </span>
+                    {{ $item->jenis_label }}
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 text-slate-500">{{ $item->created_at->format('d M Y H:i') }}</td>
+                <td class="px-5 py-3.5">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
+                    {{ $item->status === 'pending' ? 'bg-amber-50 text-amber-600 border border-amber-200' : '' }}
+                    {{ $item->status === 'diproses' ? 'bg-blue-50 text-blue-600 border border-blue-200' : '' }}
+                    {{ $item->status === 'diverifikasi' ? 'bg-indigo-50 text-indigo-600 border border-indigo-200' : '' }}
+                    {{ $item->status === 'disetujui' ? 'bg-green-50 text-green-600 border border-green-200' : '' }}
+                    {{ $item->status === 'ditolak' ? 'bg-red-50 text-red-600 border border-red-200' : '' }}
+                  ">
+                    <i class="bi 
+                      {{ $item->status === 'pending' ? 'bi-clock-history' : '' }}
+                      {{ $item->status === 'diproses' ? 'bi-hourglass-split' : '' }}
+                      {{ $item->status === 'diverifikasi' ? 'bi-check-circle' : '' }}
+                      {{ $item->status === 'disetujui' ? 'bi-check2-circle' : '' }}
+                      {{ $item->status === 'ditolak' ? 'bi-x-circle' : '' }}
+                    "></i>
+                    {{ $item->status_label }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-1.5">
+                    @if($item->status === 'pending' || $item->status === 'ditolak')
+                    <a href="{{ route('mahasiswa.pengajuan.edit', $item->id) }}" 
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition">
+                      <i class="bi bi-pencil"></i>
+                      Edit
+                    </a>
+                    <form action="{{ route('mahasiswa.pengajuan.destroy', $item->id) }}" method="POST" 
+                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengajuan ini?')">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" 
+                              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition">
+                        <i class="bi bi-trash"></i>
+                        Hapus
+                      </button>
+                    </form>
+                    @else
+                    <span class="text-xs text-slate-400">-</span>
+                    @endif
+                  </div>
+                </td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+        @else
+        <div class="text-center py-12">
+          <i class="bi bi-inbox text-5xl text-slate-300"></i>
+          <p class="text-slate-400 mt-3">Belum ada riwayat pengajuan surat.</p>
+          <p class="text-slate-400 text-sm">Silakan ajukan surat pertama Anda di atas.</p>
+        </div>
+        @endif
       </div>
     </section>
 

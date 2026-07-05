@@ -20,6 +20,85 @@ class SuratPengajuanController extends Controller
     }
 
     /**
+     * Tampilkan dashboard mahasiswa dengan riwayat pengajuan
+     */
+    public function dashboard()
+    {
+        $user = User::find(Session::get('user_id'));
+        
+        $pengajuan = SuratPengajuan::where('user_id', Session::get('user_id'))
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('dashboard.mahasiswa.app', [
+            'user' => $user,
+            'pengajuan' => $pengajuan,
+        ]);
+    }
+
+    /**
+     * Tampilkan semua riwayat pengajuan mahasiswa
+     */
+    public function riwayat()
+    {
+        $user = User::find(Session::get('user_id'));
+        
+        $pengajuan = SuratPengajuan::where('user_id', Session::get('user_id'))
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('dashboard.mahasiswa.riwayat', [
+            'user' => $user,
+            'pengajuan' => $pengajuan,
+        ]);
+    }
+
+    /**
+     * Tampilkan admin dashboard dengan data pengajuan
+     */
+    public function adminDashboard()
+    {
+        $pengajuan = SuratPengajuan::with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'nama' => $item->nama,
+                    'nim' => $item->nim,
+                    'semester' => $item->semester,
+                    'prodi' => $item->user->prodi ?? '-',
+                    'jenis' => $item->jenis,
+                    'jenis_label' => $item->jenis_label,
+                    'keterangan' => $item->keterangan,
+                    'lampiran' => $item->lampiran ? asset('storage/' . $item->lampiran) : null,
+                    'status' => $item->status,
+                    'status_label' => $item->status_label,
+                    'created_at' => $item->created_at->format('d M Y H:i'),
+                    'updated_at' => $item->updated_at->format('d M Y H:i'),
+                    'tanggal' => $item->created_at->format('d M Y'),
+                    'catatan_admin' => $item->catatan_admin,
+                ];
+            });
+
+        $statistik = [
+            'total' => SuratPengajuan::count(),
+            'pending' => SuratPengajuan::where('status', 'pending')->count(),
+            'diproses' => SuratPengajuan::where('status', 'diproses')->count(),
+            'diverifikasi' => SuratPengajuan::where('status', 'diverifikasi')->count(),
+            'disetujui' => SuratPengajuan::where('status', 'disetujui')->count(),
+            'ditolak' => SuratPengajuan::where('status', 'ditolak')->count(),
+        ];
+
+        return view('dashboard.admin.app', [
+            'pengajuan' => $pengajuan,
+            'statistik' => $statistik,
+        ]);
+    }
+
+    /**
      * Tampilkan form isi data (langkah "Isi Form" pada flowchart).
      */
     public function create(string $jenis)
@@ -126,5 +205,113 @@ class SuratPengajuanController extends Controller
 
         return redirect()->route('mahasiswa.dashboard')
             ->with('success', 'Pengajuan berhasil dihapus.');
+    }
+
+    /**
+     * Terima pengajuan (admin) - menggunakan redirect dengan session
+     */
+    public function terima(Request $request, $id)
+    {
+        $pengajuan = SuratPengajuan::findOrFail($id);
+        
+        $request->validate([
+            'catatan' => 'nullable|string|max:500',
+        ]);
+
+        $pengajuan->update([
+            'status' => 'disetujui',
+            'catatan_admin' => $request->catatan ?? null,
+            'verified_at' => now(),
+            'verified_by' => Session::get('user_id'),
+        ]);
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Pengajuan "' . $pengajuan->jenis_label . '" berhasil diterima!');
+    }
+
+    /**
+     * Tolak pengajuan (admin) - menggunakan redirect dengan session
+     */
+    public function tolak(Request $request, $id)
+    {
+        $pengajuan = SuratPengajuan::findOrFail($id);
+        
+        $request->validate([
+            'catatan' => 'required|string|max:500',
+        ]);
+
+        $pengajuan->update([
+            'status' => 'ditolak',
+            'catatan_admin' => $request->catatan,
+            'verified_at' => now(),
+            'verified_by' => Session::get('user_id'),
+        ]);
+
+        return redirect()->route('admin.dashboard')
+            ->with('error', 'Pengajuan "' . $pengajuan->jenis_label . '" berhasil ditolak.');
+    }
+
+    /**
+     * Get data pengajuan untuk API.
+     */
+    public function get(Request $request)
+    {
+        $status = $request->query('status');
+        $limit = $request->query('limit', 5);
+        $jenis = $request->query('jenis');
+
+        $query = SuratPengajuan::with('user')
+            ->orderBy('created_at', 'desc');
+
+        if ($status && in_array($status, ['pending', 'diproses', 'diverifikasi', 'disetujui', 'ditolak'])) {
+            $query->where('status', $status);
+        }
+
+        if ($jenis && in_array($jenis, $this->jenisValid())) {
+            $query->where('jenis', $jenis);
+        }
+
+        $pengajuan = $query->limit($limit)->get();
+
+        $formattedData = $pengajuan->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'nama' => $item->nama,
+                'nim' => $item->nim,
+                'semester' => $item->semester,
+                'keterangan' => $item->keterangan,
+                'lampiran' => $item->lampiran ? asset('storage/' . $item->lampiran) : null,
+                'jenis' => $item->jenis,
+                'jenis_label' => $item->jenis_label,
+                'status' => $item->status,
+                'status_label' => $item->status_label,
+                'tanggal' => $item->created_at->format('d M Y'),
+                'created_at' => $item->created_at->format('d M Y H:i'),
+                'updated_at' => $item->updated_at->format('d M Y H:i'),
+                'user' => $item->user ? [
+                    'id' => $item->user->id,
+                    'name' => $item->user->name,
+                    'email' => $item->user->email,
+                    'prodi' => $item->user->prodi ?? '-',
+                ] : null,
+            ];
+        });
+
+        $statistik = [
+            'total' => SuratPengajuan::count(),
+            'pending' => SuratPengajuan::where('status', 'pending')->count(),
+            'diproses' => SuratPengajuan::where('status', 'diproses')->count(),
+            'diverifikasi' => SuratPengajuan::where('status', 'diverifikasi')->count(),
+            'disetujui' => SuratPengajuan::where('status', 'disetujui')->count(),
+            'ditolak' => SuratPengajuan::where('status', 'ditolak')->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'pengajuan' => $formattedData,
+                'statistik' => $statistik,
+            ]
+        ]);
     }
 }

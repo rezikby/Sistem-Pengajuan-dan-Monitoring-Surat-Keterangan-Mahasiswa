@@ -21,6 +21,9 @@ class SuratPengajuan extends Model
         'keterangan',
         'lampiran',
         'status',
+        'catatan_admin',
+        'verified_at',
+        'verified_by',
     ];
 
     /**
@@ -43,10 +46,11 @@ class SuratPengajuan extends Model
     public function getStatusLabelAttribute(): string
     {
         return match ($this->status) {
-            'pending'   => 'Menunggu Verifikasi',
+            'pending'   => 'Pending',
             'diproses'  => 'Diproses',
-            'selesai'   => 'Selesai',
-            'ditolak'   => 'Ditolak / Revisi',
+            'diverifikasi' => 'Diverifikasi',
+            'disetujui' => 'Disetujui',
+            'ditolak'   => 'Ditolak',
             default     => ucfirst($this->status),
         };
     }

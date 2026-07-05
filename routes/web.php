@@ -1,59 +1,85 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController as AuthAuthController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Mahasiswa\SuratPengajuanController;
-use App\Models\SuratPengajuan;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-//
-Route::get('/login/admin', [AuthAuthController::class, 'showAdminLogin'])->name('auth.admin.login');
-Route::post('/login/admin', [AuthAuthController::class, 'loginAdmin'])->name('auth.admin.login.submit');
+// ========================
+// ROUTE AUTHENTICATION
+// ========================
 
-// login mahasiswa
-Route::get('/', [AuthAuthController::class, 'showMahasiswaLogin'])->name('auth.mahasiswa.login');
-Route::post('/login/mahasiswa', [AuthAuthController::class, 'loginMahasiswa'])->name('auth.mahasiswa.login.submit');
+// Login Admin
+// Login Admin
+Route::get('/login/admin', [AuthController::class, 'showAdminLogin'])->name('auth.admin.login');
+Route::post('/login/admin', [AuthController::class, 'loginAdmin'])->name('auth.admin.login.submit');
 
-// dahsboard mahasiswa
-Route::get('/siswa', function () {
-    $user = User::find(session('user_id'));
+// Login Mahasiswa
+Route::get('/', [AuthController::class, 'showMahasiswaLogin'])->name('auth.mahasiswa.login');
+Route::post('/login/mahasiswa', [AuthController::class, 'loginMahasiswa'])->name('auth.mahasiswa.login.submit');
 
-    $pengajuan = SuratPengajuan::where('user_id', session('user_id'))
-        ->latest()
-        ->take(10)
-        ->get();
+// Logout
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    return view('dashboard.mahasiswa.app', compact('user', 'pengajuan'));
-})->name('mahasiswa.dashboard');
+// ========================
+// ROUTE MAHASISWA
+// ========================
 
-// pengajuan surat mahasiswa (pilih jenis surat -> isi form -> kirim pengajuan)
-Route::get('/siswa/surat/{jenis}', [SuratPengajuanController::class, 'create'])
-    ->name('mahasiswa.surat.form')->where('jenis', 'aktif|magang|rekomendasi');
+Route::prefix('siswa')->name('mahasiswa.')->group(function () {
+    
+    // Dashboard Mahasiswa
+    Route::get('/', [SuratPengajuanController::class, 'dashboard'])
+        ->name('dashboard');
 
-Route::post('/siswa/surat/{jenis}', [SuratPengajuanController::class, 'store'])
-    ->name('mahasiswa.surat.submit')->where('jenis', 'aktif|magang|rekomendasi');
+    // Riwayat lengkap pengajuan
+    Route::get('/riwayat', [SuratPengajuanController::class, 'riwayat'])
+        ->name('riwayat');
 
-// edit & hapus pengajuan (riwayat pengajuan terbaru)
-Route::get('/siswa/pengajuan/{pengajuan}/edit', [SuratPengajuanController::class, 'edit'])
-    ->name('mahasiswa.pengajuan.edit');
+    // Form & Submit Surat
+    Route::get('/surat/{jenis}', [SuratPengajuanController::class, 'create'])
+        ->name('surat.form')
+        ->where('jenis', 'aktif|magang|rekomendasi');
 
-Route::put('/siswa/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'update'])
-    ->name('mahasiswa.pengajuan.update');
+    Route::post('/surat/{jenis}', [SuratPengajuanController::class, 'store'])
+        ->name('surat.submit')
+        ->where('jenis', 'aktif|magang|rekomendasi');
 
-Route::delete('/siswa/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'destroy'])
-    ->name('mahasiswa.pengajuan.destroy');
+    // Edit & Hapus Pengajuan
+    Route::get('/pengajuan/{pengajuan}/edit', [SuratPengajuanController::class, 'edit'])
+        ->name('pengajuan.edit');
 
-Route::get('/admin', function () {
-    return view('dashboard.admin.app'); 
-})->name('admin.dashboard');
+    Route::put('/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'update'])
+        ->name('pengajuan.update');
 
-Route::post('/logout', [AuthAuthController::class, 'logout'])->name('logout');
+    Route::delete('/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'destroy'])
+        ->name('pengajuan.destroy');
+});
 
+// ========================
+// ROUTE ADMIN
+// ========================
 
 Route::prefix('admin')->name('admin.')->group(function () {
+    
+    // Dashboard Admin
+    Route::get('/', [SuratPengajuanController::class, 'adminDashboard'])
+        ->name('dashboard');
 
+    // Route Pengajuan - menggunakan POST untuk form submit
+    Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
+        Route::get('/', [SuratPengajuanController::class, 'get'])->name('index');
+        
+        // Terima dan Tolak menggunakan POST dengan form
+        Route::post('/{id}/terima', [SuratPengajuanController::class, 'terima'])->name('terima');
+        Route::post('/{id}/tolak', [SuratPengajuanController::class, 'tolak'])->name('tolak');
+    });
+
+    // Akademik
     Route::prefix('akademik')->name('akademik.')->group(function () {
         Route::get('tahun', fn() => view('dashboard.admin.coming-soon'))->name('tahun');
         Route::get('kalender', fn() => view('dashboard.admin.coming-soon'))->name('kalender');
@@ -62,29 +88,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('ruangan', fn() => view('dashboard.admin.coming-soon'))->name('ruangan');
     });
 
+    // Mahasiswa
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         Route::get('data', fn() => view('dashboard.admin.coming-soon'))->name('data');
         Route::get('status', fn() => view('dashboard.admin.coming-soon'))->name('status');
         Route::get('import', fn() => view('dashboard.admin.coming-soon'))->name('import');
     });
 
+    // Dosen
     Route::prefix('dosen')->name('dosen.')->group(function () {
         Route::get('data', fn() => view('dashboard.admin.coming-soon'))->name('data');
         Route::get('beban', fn() => view('dashboard.admin.coming-soon'))->name('beban');
     });
 
+    // Mata Kuliah
     Route::prefix('matkul')->name('matkul.')->group(function () {
         Route::get('/', fn() => view('dashboard.admin.coming-soon'))->name('index');
         Route::get('kurikulum', fn() => view('dashboard.admin.coming-soon'))->name('kurikulum');
         Route::get('prodi', fn() => view('dashboard.admin.coming-soon'))->name('prodi');
     });
 
+    // KRS
     Route::prefix('krs')->name('krs.')->group(function () {
-        Route::get('pengajuan', fn() => view('dashboard.admin.coming-soon'))->name('pengajuan');
+        Route::get('pengajuan', fn() => view('dashboard.admin.krs.pengajuan'))->name('pengajuan');
         Route::get('validasi', fn() => view('dashboard.admin.coming-soon'))->name('validasi');
         Route::get('riwayat', fn() => view('dashboard.admin.coming-soon'))->name('riwayat');
     });
 
+    // Nilai
     Route::prefix('nilai')->name('nilai.')->group(function () {
         Route::get('input', fn() => view('dashboard.admin.coming-soon'))->name('input');
         Route::get('validasi', fn() => view('dashboard.admin.coming-soon'))->name('validasi');
@@ -92,12 +123,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('transkrip', fn() => view('dashboard.admin.coming-soon'))->name('transkrip');
     });
 
+    // Kelulusan
     Route::prefix('kelulusan')->name('kelulusan.')->group(function () {
         Route::get('yudisium', fn() => view('dashboard.admin.coming-soon'))->name('yudisium');
         Route::get('wisuda', fn() => view('dashboard.admin.coming-soon'))->name('wisuda');
         Route::get('ijazah', fn() => view('dashboard.admin.coming-soon'))->name('ijazah');
     });
 
+    // Surat
     Route::prefix('surat')->name('surat.')->group(function () {
         Route::get('akademik', fn() => view('dashboard.admin.coming-soon'))->name('akademik');
         Route::get('template', fn() => view('dashboard.admin.coming-soon'))->name('template');
@@ -108,4 +141,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('pengguna', fn() => view('dashboard.admin.coming-soon'))->name('pengguna');
     Route::get('pengaturan', fn() => view('dashboard.admin.coming-soon'))->name('pengaturan');
     Route::get('keamanan', fn() => view('dashboard.admin.coming-soon'))->name('keamanan');
+});
+
+// ========================
+// ROUTE API
+// ========================
+
+Route::prefix('api')->name('api.')->group(function () {
+    Route::get('/pengajuan', [SuratPengajuanController::class, 'get'])
+        ->name('pengajuan.index');
 });

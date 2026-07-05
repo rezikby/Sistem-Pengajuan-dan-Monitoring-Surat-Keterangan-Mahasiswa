@@ -6,6 +6,22 @@
 
 <div class="space-y-6">
 
+    {{-- Alert Success --}}
+    @if(session('success'))
+    <div class="flex items-start gap-2 bg-green-50 border border-green-200 text-green-600 rounded-xl px-4 py-3 text-sm">
+        <i class="bi bi-check-circle-fill mt-0.5"></i>
+        <span>{{ session('success') }}</span>
+    </div>
+    @endif
+
+    {{-- Alert Error --}}
+    @if(session('error'))
+    <div class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">
+        <i class="bi bi-x-circle-fill mt-0.5"></i>
+        <span>{{ session('error') }}</span>
+    </div>
+    @endif
+
     {{-- Header --}}
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -31,8 +47,7 @@
 
     {{-- Statistik Card --}}
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
-        {{-- Card 1: Total Pengajuan --}}
+        <!-- Card 1: Total Pengajuan -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-100 flex justify-between items-center hover:border-blue-200 transition duration-300">
             <div>
                 <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Pengajuan</p>
@@ -46,7 +61,7 @@
             </div>
         </div>
 
-        {{-- Card 2: Diproses --}}
+        <!-- Card 2: Diproses -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-100 flex justify-between items-center hover:border-amber-200 transition duration-300">
             <div>
                 <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Diproses</p>
@@ -60,7 +75,7 @@
             </div>
         </div>
 
-        {{-- Card 3: Selesai --}}
+        <!-- Card 3: Selesai -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-100 flex justify-between items-center hover:border-emerald-200 transition duration-300">
             <div>
                 <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Selesai</p>
@@ -74,7 +89,7 @@
             </div>
         </div>
 
-        {{-- Card 4: Ditolak --}}
+        <!-- Card 4: Ditolak -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-100 flex justify-between items-center hover:border-rose-200 transition duration-300">
             <div>
                 <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Ditolak</p>
@@ -87,63 +102,6 @@
                 <i class="bi bi-x-circle text-xl"></i>
             </div>
         </div>
-
-    </div>
-
-    {{-- Grafik & Aktivitas --}}
-    <div class="grid lg:grid-cols-3 gap-6">
-
-        {{-- Grafik --}}
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6">
-            <div class="flex justify-between mb-5">
-                <h3 class="font-semibold text-lg">Statistik Pengajuan</h3>
-                <span class="text-sm text-slate-400">Tahun 2026</span>
-            </div>
-            <div class="h-80 rounded-xl bg-slate-100 flex items-center justify-center">
-                <div class="text-center">
-                    <i class="bi bi-bar-chart text-5xl text-slate-400"></i>
-                    <p class="text-slate-400 mt-3">Grafik Chart.js nanti ditampilkan di sini</p>
-                </div>
-            </div>
-        </div>
-
-        {{-- Aktivitas --}}
-        <div class="bg-white rounded-2xl shadow-sm p-6">
-            <h3 class="font-semibold text-lg mb-5">Aktivitas Terbaru</h3>
-            <div class="space-y-5">
-                @if(isset($pengajuan) && $pengajuan->isNotEmpty())
-                    @foreach($pengajuan->take(3) as $item)
-                    <div class="flex gap-3">
-                        <div class="w-10 h-10 rounded-full 
-                            {{ $item->status === 'pending' ? 'bg-amber-100' : '' }}
-                            {{ $item->status === 'diproses' ? 'bg-blue-100' : '' }}
-                            {{ $item->status === 'diverifikasi' ? 'bg-indigo-100' : '' }}
-                            {{ $item->status === 'disetujui' ? 'bg-emerald-100' : '' }}
-                            {{ $item->status === 'ditolak' ? 'bg-rose-100' : '' }}
-                            flex items-center justify-center">
-                            <i class="bi 
-                                {{ $item->status === 'pending' ? 'bi-clock-history text-amber-600' : '' }}
-                                {{ $item->status === 'diproses' ? 'bi-hourglass-split text-blue-600' : '' }}
-                                {{ $item->status === 'diverifikasi' ? 'bi-check-circle text-indigo-600' : '' }}
-                                {{ $item->status === 'disetujui' ? 'bi-check2-circle text-emerald-600' : '' }}
-                                {{ $item->status === 'ditolak' ? 'bi-x-circle text-rose-600' : '' }}
-                            "></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-sm">{{ $item->nama }}</h4>
-                            <p class="text-sm text-slate-500">{{ $item->status_label }} - {{ $item->jenis_label }}</p>
-                        </div>
-                    </div>
-                    @endforeach
-                @else
-                    <div class="text-center py-8">
-                        <i class="bi bi-inbox text-4xl text-slate-300"></i>
-                        <p class="text-slate-400 text-sm mt-2">Belum ada aktivitas terbaru</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-
     </div>
 
     {{-- Tabel Pengajuan Terbaru --}}
@@ -188,13 +146,12 @@
                                 <div class="flex items-center justify-center gap-2">
                                     <button onclick="openModal({
                                         id: '{{ $item->id }}',
-                                        nama: '{{ $item->nama }}',
+                                        nama: '{{ addslashes($item->nama) }}',
                                         nim: '{{ $item->nim }}',
                                         semester: '{{ $item->semester }}',
                                         prodi: '{{ $item->prodi ?? '-' }}',
-                                        jenis: '{{ $item->jenis }}',
                                         jenis_label: '{{ $item->jenis_label }}',
-                                        keterangan: '{{ $item->keterangan ?? '-' }}',
+                                        keterangan: '{{ addslashes($item->keterangan ?? '-') }}',
                                         lampiran: '{{ $item->lampiran }}',
                                         status: '{{ $item->status }}',
                                         status_label: '{{ $item->status_label }}',
@@ -293,7 +250,6 @@
         }
     }
 
-    // Fungsi untuk format tanggal
     function formatDate() {
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -307,7 +263,6 @@
         return `${date} ${month} ${year}, ${day}`;
     }
 
-    // Set tanggal di header
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('currentDate').textContent = formatDate();
     });
