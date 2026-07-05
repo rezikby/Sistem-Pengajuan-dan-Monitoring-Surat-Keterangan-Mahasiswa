@@ -57,6 +57,7 @@
           class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
       @csrf
 
+      {{-- INPUT STRUKTUR STANDAR LAMA (TETAP DI-MAINTAIN) --}}
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label for="nama" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Nama</label>
@@ -72,21 +73,111 @@
         </div>
       </div>
 
-      <div>
-        <label for="semester" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Semester</label>
-        <select id="semester" name="semester" required
-                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30 focus:border-[#4f8ef7]">
-          <option value="" disabled {{ old('semester') ? '' : 'selected' }}>Pilih semester</option>
-          @for ($i = 1; $i <= 8; $i++)
-          <option value="{{ $i }}" {{ old('semester') == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
-          @endfor
-        </select>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label for="semester" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Semester</label>
+          <select id="semester" name="semester" required
+                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30 focus:border-[#4f8ef7]">
+            <option value="" disabled {{ old('semester') ? '' : 'selected' }}>Pilih semester</option>
+            @for ($i = 1; $i <= 8; $i++)
+            <option value="{{ $i }}" {{ old('semester', $user->semester ?? '') == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
+            @endfor
+          </select>
+        </div>
+        <div>
+          <label for="program_studi" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Program Studi</label>
+          <input id="program_studi" name="program_studi" type="text" required
+                 value="{{ old('program_studi', $user->prodi ?? '') }}"
+                 class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30 focus:border-[#4f8ef7]" />
+        </div>
       </div>
 
+
+      {{-- KONDISIONAL: INPUT KHUSUS SURAT MAGANG (Sesuai draf Word Berkas Magang) --}}
+      @if($jenis === 'magang')
+      <div class="border-t border-slate-100 pt-6 space-y-6">
+        <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Informasi Tambahan Instansi Magang</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label for="pimpinan_instansi" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Pimpinan Instansi Tujuan</label>
+            <input id="pimpinan_instansi" name="pimpinan_instansi" type="text" required placeholder="Contoh: Pimpinan / Manajer HRD" value="{{ old('pimpinan_instansi') }}"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+          </div>
+          <div>
+            <label for="instansi_tujuan" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Nama Instansi / Perusahaan</label>
+            <input id="instansi_tujuan" name="instansi_tujuan" type="text" required placeholder="Contoh: PT. Timah Tbk" value="{{ old('instansi_tujuan') }}"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label for="awal_magang" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Tanggal Mulai Magang</label>
+            <input id="awal_magang" name="awal_magang" type="date" required value="{{ old('awal_magang') }}"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+          </div>
+          <div>
+            <label for="akhir_magang" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Tanggal Selesai Magang</label>
+            <input id="akhir_magang" name="akhir_magang" type="date" required value="{{ old('akhir_magang') }}"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+          </div>
+        </div>
+
+        <div>
+          <label for="email_mahasiswa" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Email Aktif Mahasiswa</label>
+          <input id="email_mahasiswa" name="email_mahasiswa" type="email" required placeholder="nama@example.com" value="{{ old('email_mahasiswa', $user->email ?? '') }}"
+                 class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+        </div>
+      </div>
+      @endif
+
+
+      {{-- KONDISIONAL: INPUT KHUSUS SURAT REKOMENDASI (Sesuai draf Word Surat Rekomendasi) --}}
+      @if($jenis === 'rekomendasi')
+      <div class="border-t border-slate-100 pt-6 space-y-6">
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-600">Informasi Pemberi & Tujuan Rekomendasi</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label for="nama_dosen" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Nama Lengkap Dosen Pemberi Rekomendasi</label>
+            <input id="nama_dosen" name="nama_dosen" type="text" required placeholder="Nama Dosen & Gelar" value="{{ old('nama_dosen') }}"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+          </div>
+          <div>
+            <label for="nip_dosen" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">NIP / NIDN Dosen</label>
+            <input id="nip_dosen" name="nip_dosen" type="text" required placeholder="Nomor Identitas Kerja Dosen" value="{{ old('nip_dosen') }}"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label for="jabatan_akademik" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Jabatan Akademik Dosen</label>
+            <input id="jabatan_akademik" name="jabatan_akademik" type="text" required placeholder="Contoh: Ketua Program Studi / Dosen Wali" value="{{ old('jabatan_akademik') }}"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+          </div>
+          <div>
+            <label for="fakultas" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Fakultas / Jurusan Mahasiswa</label>
+            <input id="fakultas" name="fakultas" type="text" required placeholder="Contoh: Jurusan Teknik Elektro" value="{{ old('fakultas', $user->fakultas ?? '') }}"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+          </div>
+        </div>
+
+        <div>
+          <label for="tujuan_rekomendasi" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Tujuan Penggunaan Surat Rekomendasi</label>
+          <input id="tujuan_rekomendasi" name="tujuan_rekomendasi" type="text" required placeholder="Contoh: Pendaftaran Beasiswa Bank Indonesia / Lomba National Welding Competition" value="{{ old('tujuan_rekomendasi') }}"
+                 class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30" />
+        </div>
+      </div>
+      @endif
+
+
+      {{-- INPUT STANDAR BAWAAN LAMA --}}
       <div>
-        <label for="keterangan" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Keterangan</label>
-        <textarea id="keterangan" name="keterangan" rows="4"
-                  placeholder="Mohon ketikkan keterangan disini..."
+        <label for="keterangan" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Keterangan Tambahan</label>
+        <textarea id="keterangan" name="keterangan" rows="3"
+                  placeholder="Mohon ketikkan keterangan pendukung disini jika ada..."
                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#4f8ef7]/30 focus:border-[#4f8ef7]">{{ old('keterangan') }}</textarea>
       </div>
 
@@ -111,5 +202,4 @@
 
   </main>
 </body>
-
 </html>
