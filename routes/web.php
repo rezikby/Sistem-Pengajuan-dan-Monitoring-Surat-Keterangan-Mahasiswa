@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Auth\AuthController as AuthAuthController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Mahasiswa\SuratPengajuanController;
+use App\Models\SuratPengajuan;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 
@@ -15,8 +18,32 @@ Route::post('/login/mahasiswa', [AuthAuthController::class, 'loginMahasiswa'])->
 
 // dahsboard mahasiswa
 Route::get('/siswa', function () {
-    return view('dashboard.mahasiswa.app'); 
+    $user = User::find(session('user_id'));
+
+    $pengajuan = SuratPengajuan::where('user_id', session('user_id'))
+        ->latest()
+        ->take(10)
+        ->get();
+
+    return view('dashboard.mahasiswa.app', compact('user', 'pengajuan'));
 })->name('mahasiswa.dashboard');
+
+// pengajuan surat mahasiswa (pilih jenis surat -> isi form -> kirim pengajuan)
+Route::get('/siswa/surat/{jenis}', [SuratPengajuanController::class, 'create'])
+    ->name('mahasiswa.surat.form')->where('jenis', 'aktif|magang|rekomendasi');
+
+Route::post('/siswa/surat/{jenis}', [SuratPengajuanController::class, 'store'])
+    ->name('mahasiswa.surat.submit')->where('jenis', 'aktif|magang|rekomendasi');
+
+// edit & hapus pengajuan (riwayat pengajuan terbaru)
+Route::get('/siswa/pengajuan/{pengajuan}/edit', [SuratPengajuanController::class, 'edit'])
+    ->name('mahasiswa.pengajuan.edit');
+
+Route::put('/siswa/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'update'])
+    ->name('mahasiswa.pengajuan.update');
+
+Route::delete('/siswa/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'destroy'])
+    ->name('mahasiswa.pengajuan.destroy');
 
 Route::get('/admin', function () {
     return view('dashboard.admin.app'); 
