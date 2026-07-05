@@ -44,7 +44,7 @@
             {{-- Desktop Menu --}}
             <div class="hidden lg:flex items-center gap-1 flex-1 justify-center">
                 {{-- Dashboard --}}
-                <a href="{{ route('mahasiswa.landing') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap text-white/80">
+                <a href="{{ route('mahasiswa.aktif.landing') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap text-white/80">
                     <i class="bi bi-house-door-fill text-base"></i>
                     <span>Dashboard</span>
                 </a>
@@ -121,7 +121,7 @@
                         class="fixed shadow-xl py-1 min-w-[200px] border z-50"
                         :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${krsLeft}px;`">
 
-                        <a href="{{ route('mahasiswa.dashboard') }}" class="block px-4 py-2 text-sm text-white/70">Pengajuan</a>
+                        <a href="{{ route('mahasiswa.aktif.dashboard') }}" class="block px-4 py-2 text-sm text-white/70">Pengajuan</a>
                         <a href="{{ route('mahasiswa.riwayat') }}" class="block px-4 py-2 text-sm text-white/70">Riwayat</a>
                     </div>
                 </div>
@@ -175,7 +175,7 @@
             style="border-color: rgba(255,255,255,0.1);">
 
             {{-- Dashboard --}}
-            <a href="{{ route('mahasiswa.landing') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-white/80">
+            <a href="{{ route('mahasiswa.aktif.landing') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-white/80">
                 <i class="bi bi-house-door-fill text-lg"></i>
                 <span>Dashboard</span>
             </a>
@@ -239,7 +239,7 @@
                     <i class="bi bi-chevron-down text-xs transition-transform" :class="dropdownMobileKrs ? 'rotate-180' : ''"></i>
                 </button>
                 <div x-show="dropdownMobileKrs" class="ml-8 space-y-1 border-l pl-4" style="border-color: rgba(255,255,255,0.15);">
-                    <a href="{{ route('mahasiswa.dashboard') }}" class="block px-4 py-2 rounded-md text-sm text-white/70">Pengajuan</a>
+                    <a href="{{ route('mahasiswa.aktif.dashboard') }}" class="block px-4 py-2 rounded-md text-sm text-white/70">Pengajuan</a>
                     <a href="{{ route('mahasiswa.riwayat') }}" class="block px-4 py-2 rounded-md text-sm text-white/70">Riwayat</a>
                 </div>
             </div>

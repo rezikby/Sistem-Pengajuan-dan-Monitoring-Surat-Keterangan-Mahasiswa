@@ -25,7 +25,7 @@
 
   <header class="bg-white border-b border-slate-200">
     <div class="max-w-3xl mx-auto px-6 h-16 flex items-center gap-3">
-      <a href="{{ route('mahasiswa.dashboard') }}" class="text-slate-400 hover:text-slate-600 transition-colors">
+      <a href="{{ route("mahasiswa.{$jenis}.dashboard") }}" class="text-slate-400 hover:text-slate-600 transition-colors">
         <i class="bi bi-arrow-left text-lg"></i>
       </a>
       <div class="w-9 h-9 rounded-lg bg-[#4f8ef7] flex items-center justify-center shrink-0">
@@ -52,7 +52,7 @@
     </div>
     @endif
 
-    <form method="POST" action="{{ route('mahasiswa.surat.submit', $jenis) }}"
+    <form method="POST" action="{{ route("mahasiswa.{$jenis}.store") }}"
           enctype="multipart/form-data"
           class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
       @csrf
@@ -189,7 +189,7 @@
       </div>
 
       <div class="flex items-center justify-end gap-3 pt-2">
-        <a href="{{ route('mahasiswa.dashboard') }}"
+        <a href="{{ route("mahasiswa.{$jenis}.dashboard") }}"
            class="px-5 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-100 transition-colors">
           Batal
         </a>

@@ -76,7 +76,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
         {{-- Surat Aktif Kuliah --}}
-        <a href="{{ route('mahasiswa.surat.form', 'aktif') }}"
+        <a href="{{ route('mahasiswa.aktif.form') }}"
            class="group bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-blue-400/40 transition-all opacity-75 hover:opacity-100 flex flex-col justify-between">
           <div>
             <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 text-xl mb-4 group-hover:bg-blue-500 group-hover:text-white transition-all">
@@ -93,7 +93,7 @@
         </a>
 
         {{-- Surat Magang / PKL --}}
-        <a href="{{ route('mahasiswa.surat.form', 'magang') }}"
+        <a href="{{ route('mahasiswa.magang.form') }}"
            class="group bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-polman-blue/40 transition-all flex flex-col justify-between">
           <div>
             <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-polman-blue text-xl mb-4 group-hover:bg-polman-blue group-hover:text-white transition-all shadow-sm">
@@ -110,7 +110,7 @@
         </a>
 
         {{-- Surat Rekomendasi --}}
-        <a href="{{ route('mahasiswa.surat.form', 'rekomendasi') }}"
+        <a href="{{ route('mahasiswa.rekomendasi.form') }}"
            class="group bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md hover:border-slate-400/40 transition-all flex flex-col justify-between">
           <div>
             <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 text-xl mb-4 group-hover:bg-slate-700 group-hover:text-white transition-all shadow-sm">
@@ -203,7 +203,7 @@
                 <td class="px-5 py-3.5 text-right">
                   <div class="inline-flex items-center gap-1.5">
                     @if($item->status === 'pending' || $item->status === 'ditolak')
-                    <a href="{{ route('mahasiswa.pengajuan.edit', $item->id) }}" class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition">Edit</a>
+                    <a href="{{ route("mahasiswa.{$item->jenis}.edit", $item) }}" class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition">Edit</a>
                     @elseif($item->status === 'disetujui')
                     <a href="{{ route('mahasiswa.pengajuan.download', $item->id) }}" download class="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1"><i class="bi bi-download"></i> Unduh</a>
                     @else

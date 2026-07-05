@@ -3,6 +3,9 @@
 use App\Http\Controllers\Admin\SuratTemplateController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Mahasiswa\SuratPengajuanController;
+use App\Http\Controllers\Mahasiswa\SuratAktifKuliahController;
+use App\Http\Controllers\Mahasiswa\SuratMagangController;
+use App\Http\Controllers\Mahasiswa\SuratRekomendasiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,39 +36,58 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('siswa')->name('mahasiswa.')->group(function () {
     
-    // Landing Page Mahasiswa
-    Route::get('/landing', [SuratPengajuanController::class, 'landingPage'])
-        ->name('landing');
-
-    // Dashboard Mahasiswa
-    Route::get('/', [SuratPengajuanController::class, 'dashboard'])
-        ->name('dashboard');
-
-    // Riwayat lengkap pengajuan
-    Route::get('/riwayat', [SuratPengajuanController::class, 'riwayat'])
+    // Redirect landing and dashboard to aktif type by default
+    Route::get('/landing', fn() => redirect()->route('mahasiswa.aktif.landing'));
+    Route::get('/', fn() => redirect()->route('mahasiswa.aktif.dashboard'));
+    
+    // Riwayat unified (shows all types for user)
+    Route::get('/riwayat', [SuratPengajuanController::class, 'riwayatAll'])
         ->name('riwayat');
-
-    // Form & Submit Surat
-    Route::get('/surat/{jenis}', [SuratPengajuanController::class, 'create'])
-        ->name('surat.form')
-        ->where('jenis', 'aktif|magang|rekomendasi');
-
-    Route::post('/surat/{jenis}', [SuratPengajuanController::class, 'store'])
-        ->name('surat.submit')
-        ->where('jenis', 'aktif|magang|rekomendasi');
-
-    // Edit & Hapus Pengajuan
-    Route::get('/pengajuan/{pengajuan}/edit', [SuratPengajuanController::class, 'edit'])
-        ->name('pengajuan.edit');
-
-    Route::put('/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'update'])
-        ->name('pengajuan.update');
-
-    Route::delete('/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'destroy'])
-        ->name('pengajuan.destroy');
 
     // Download generated surat for owner
     Route::get('/pengajuan/{id}/download', [SuratPengajuanController::class, 'downloadForStudent'])->name('pengajuan.download');
+
+    // *** SURAT AKTIF KULIAH ROUTES ***
+    Route::prefix('aktif')->name('aktif.')->group(function () {
+        Route::get('/landing', [SuratAktifKuliahController::class, 'landingPage'])->name('landing');
+        Route::get('/', [SuratAktifKuliahController::class, 'dashboard'])->name('dashboard');
+        Route::get('/riwayat', [SuratAktifKuliahController::class, 'riwayat'])->name('riwayat');
+        
+        Route::get('/form', [SuratAktifKuliahController::class, 'create'])->name('form');
+        Route::post('/', [SuratAktifKuliahController::class, 'store'])->name('store');
+        
+        Route::get('/{pengajuan}/edit', [SuratAktifKuliahController::class, 'edit'])->name('edit');
+        Route::put('/{pengajuan}', [SuratAktifKuliahController::class, 'update'])->name('update');
+        Route::delete('/{pengajuan}', [SuratAktifKuliahController::class, 'destroy'])->name('destroy');
+    });
+
+    // *** SURAT MAGANG ROUTES ***
+    Route::prefix('magang')->name('magang.')->group(function () {
+        Route::get('/landing', [SuratMagangController::class, 'landingPage'])->name('landing');
+        Route::get('/', [SuratMagangController::class, 'dashboard'])->name('dashboard');
+        Route::get('/riwayat', [SuratMagangController::class, 'riwayat'])->name('riwayat');
+        
+        Route::get('/form', [SuratMagangController::class, 'create'])->name('form');
+        Route::post('/', [SuratMagangController::class, 'store'])->name('store');
+        
+        Route::get('/{pengajuan}/edit', [SuratMagangController::class, 'edit'])->name('edit');
+        Route::put('/{pengajuan}', [SuratMagangController::class, 'update'])->name('update');
+        Route::delete('/{pengajuan}', [SuratMagangController::class, 'destroy'])->name('destroy');
+    });
+
+    // *** SURAT REKOMENDASI ROUTES ***
+    Route::prefix('rekomendasi')->name('rekomendasi.')->group(function () {
+        Route::get('/landing', [SuratRekomendasiController::class, 'landingPage'])->name('landing');
+        Route::get('/', [SuratRekomendasiController::class, 'dashboard'])->name('dashboard');
+        Route::get('/riwayat', [SuratRekomendasiController::class, 'riwayat'])->name('riwayat');
+        
+        Route::get('/form', [SuratRekomendasiController::class, 'create'])->name('form');
+        Route::post('/', [SuratRekomendasiController::class, 'store'])->name('store');
+        
+        Route::get('/{pengajuan}/edit', [SuratRekomendasiController::class, 'edit'])->name('edit');
+        Route::put('/{pengajuan}', [SuratRekomendasiController::class, 'update'])->name('update');
+        Route::delete('/{pengajuan}', [SuratRekomendasiController::class, 'destroy'])->name('destroy');
+    });
 });
 
 // ========================

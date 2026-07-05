@@ -23,10 +23,21 @@ class SuratPengajuan extends Model
         'keterangan',
         'lampiran',
         'surat_file',
+        'nomor_surat',
         'status',
         'catatan_admin',
         'verified_at',
         'verified_by',
+        'pimpinan_instansi',
+        'instansi_tujuan',
+        'awal_magang',
+        'akhir_magang',
+        'email_mahasiswa',
+        'nama_dosen',
+        'nip_dosen',
+        'jabatan_akademik',
+        'fakultas',
+        'tujuan_rekomendasi',
     ];
 
     /**

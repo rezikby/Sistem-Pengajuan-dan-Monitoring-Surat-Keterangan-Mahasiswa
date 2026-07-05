@@ -61,7 +61,7 @@ class AuthController extends Controller
         Session::put('user_id', $user->id);
         Session::put('role', $user->role);
 
-        return redirect()->route('mahasiswa.landing');
+        return redirect()->route('mahasiswa.aktif.landing');
     }
 
     public function logout()

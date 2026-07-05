@@ -17,60 +17,20 @@ use PhpOffice\PhpWord\IOFactory;
 class SuratPengajuanController extends Controller
 {
     /**
-     * Daftar jenis surat yang valid beserta labelnya.
+     * Escape nilai sebelum dimasukkan ke placeholder docx (${...}).
+     * Wajib dipakai di semua TemplateProcessor::setValue() supaya karakter
+     * seperti &, <, > pada data (mis. "Informatika & Bisnis") tidak merusak
+     * XML dokumen Word (yang menyebabkan "repaired document" / isi terpotong).
      */
-    protected function jenisValid(): array
+    private function docxSafe($value): string
     {
-        return array_keys(SuratPengajuan::jenisLabels());
+        return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_XML1, 'UTF-8');
     }
 
     /**
-     * Tampilkan landing page mahasiswa
+     * Tampilkan riwayat lengkap pengajuan mahasiswa (semua jenis)
      */
-    public function landingPage()
-    {
-        $userId = Session::get('user_id');
-        $user = User::find($userId);
-
-        return view('dashboard.mahasiswa.LandingPage', [
-            'user' => $user,
-        ]);
-    }
-
-    /**
-     * Tampilkan dashboard mahasiswa dengan riwayat pengajuan
-     */
-    public function dashboard()
-    {
-        $userId = Session::get('user_id');
-        $user = User::find($userId);
-        
-        $pengajuan = SuratPengajuan::where('user_id', $userId)
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
-
-        // Statistik per user
-        $statistik = [
-            'total' => SuratPengajuan::where('user_id', $userId)->count(),
-            'pending' => SuratPengajuan::where('user_id', $userId)->where('status', 'pending')->count(),
-            'diproses' => SuratPengajuan::where('user_id', $userId)->where('status', 'diproses')->count(),
-            'diverifikasi' => SuratPengajuan::where('user_id', $userId)->where('status', 'diverifikasi')->count(),
-            'disetujui' => SuratPengajuan::where('user_id', $userId)->where('status', 'disetujui')->count(),
-            'ditolak' => SuratPengajuan::where('user_id', $userId)->where('status', 'ditolak')->count(),
-        ];
-
-        return view('dashboard.mahasiswa.app', [
-            'user' => $user,
-            'pengajuan' => $pengajuan,
-            'statistik' => $statistik,
-        ]);
-    }
-
-    /**
-     * Tampilkan semua riwayat pengajuan mahasiswa
-     */
-    public function riwayat()
+    public function riwayatAll()
     {
         $user = User::find(Session::get('user_id'));
         
@@ -85,7 +45,7 @@ class SuratPengajuanController extends Controller
     }
 
     /**
-     * Tampilkan admin dashboard dengan data pengajuan
+     * Daftar jenis surat yang valid beserta labelnya.
      */
     public function adminDashboard()
     {
@@ -132,230 +92,6 @@ class SuratPengajuanController extends Controller
     /**
      * Tampilkan form isi data (langkah "Isi Form" pada flowchart).
      */
-    public function create(string $jenis)
-    {
-        abort_unless(in_array($jenis, $this->jenisValid()), 404);
-
-        $user  = User::find(Session::get('user_id'));
-        $label = SuratPengajuan::jenisLabels()[$jenis];
-
-        return view('dashboard.mahasiswa.form', [
-            'user'  => $user,
-            'jenis' => $jenis,
-            'label' => $label,
-        ]);
-    }
-
-    /**
-     * Simpan pengajuan baru (langkah "Kirim Pengajuan").
-     */
-    public function store(Request $request, string $jenis)
-    {
-        abort_unless(in_array($jenis, $this->jenisValid()), 404);
-
-        $validated = $request->validate([
-            'nama'       => 'required|string|max:255',
-            'nim'        => 'required|string|max:50',
-            'semester'   => 'required|string|max:10',
-            'keterangan' => 'nullable|string|max:1000',
-            'lampiran'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
-
-        if ($request->hasFile('lampiran')) {
-            $validated['lampiran'] = $request->file('lampiran')->store('lampiran-surat', 'public');
-        }
-
-        SuratPengajuan::create([
-            'user_id'    => Session::get('user_id'),
-            'jenis'      => $jenis,
-            'nama'       => $validated['nama'],
-            'nim'        => $validated['nim'],
-            'semester'   => $validated['semester'],
-            'keterangan' => $validated['keterangan'] ?? null,
-            'lampiran'   => $validated['lampiran'] ?? null,
-            'status'     => 'pending',
-        ]);
-
-        return redirect()->route('mahasiswa.dashboard')
-            ->with('success', 'Pengajuan "' . SuratPengajuan::jenisLabels()[$jenis] . '" berhasil dikirim. Menunggu verifikasi admin.');
-    }
-
-    /**
-     * Tampilkan form edit pengajuan milik mahasiswa yang sedang login.
-     */
-    public function edit(SuratPengajuan $pengajuan)
-    {
-        abort_unless($pengajuan->user_id === Session::get('user_id'), 403);
-
-        return view('dashboard.mahasiswa.edit', [
-            'pengajuan' => $pengajuan,
-            'label'     => $pengajuan->jenis_label,
-        ]);
-    }
-
-    /**
-     * Simpan perubahan pengajuan.
-     */
-    public function update(Request $request, SuratPengajuan $pengajuan)
-    {
-        abort_unless($pengajuan->user_id === Session::get('user_id'), 403);
-
-        $validated = $request->validate([
-            'nama'       => 'required|string|max:255',
-            'nim'        => 'required|string|max:50',
-            'semester'   => 'required|string|max:10',
-            'keterangan' => 'nullable|string|max:1000',
-            'lampiran'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
-
-        if ($request->hasFile('lampiran')) {
-            if ($pengajuan->lampiran) {
-                Storage::disk('public')->delete($pengajuan->lampiran);
-            }
-            $validated['lampiran'] = $request->file('lampiran')->store('lampiran-surat', 'public');
-        }
-
-        $pengajuan->update($validated);
-
-        return redirect()->route('mahasiswa.dashboard')
-            ->with('success', 'Pengajuan berhasil diperbarui.');
-    }
-
-    /**
-     * Generate .docx from template or fallback content.
-     */
-    protected function generateDocxSurat(SuratPengajuan $pengajuan, ?int $templateId = null, ?string $generatedContent = null): string
-    {
-        $filename = 'surat_pengajuan_' . $pengajuan->id . '_' . time() . '.docx';
-        $generatedDir = Storage::disk('public')->path('generated-surat');
-        if (!file_exists($generatedDir)) {
-            mkdir($generatedDir, 0755, true);
-        }
-        $outputPath = $generatedDir . DIRECTORY_SEPARATOR . $filename;
-
-        $placeholders = [
-            '${nama}' => $pengajuan->nama,
-            '{{nama}}' => $pengajuan->nama,
-            '${nim}' => $pengajuan->nim,
-            '{{nim}}' => $pengajuan->nim,
-            '${semester}' => $pengajuan->semester,
-            '{{semester}}' => $pengajuan->semester,
-            '${prodi}' => $pengajuan->user?->prodi ?? '-',
-            '{{prodi}}' => $pengajuan->user?->prodi ?? '-',
-            '${program_studi}' => $pengajuan->user?->prodi ?? '-',
-            '{{program_studi}}' => $pengajuan->user?->prodi ?? '-',
-            '${fakultas}' => $pengajuan->user?->fakultas ?? '-',
-            '{{fakultas}}' => $pengajuan->user?->fakultas ?? '-',
-            '${jenis}' => $pengajuan->jenis_label,
-            '{{jenis}}' => $pengajuan->jenis_label,
-            '${keterangan}' => $pengajuan->keterangan ?? '-',
-            '{{keterangan}}' => $pengajuan->keterangan ?? '-',
-            '${status}' => $pengajuan->status_label,
-            '{{status}}' => $pengajuan->status_label,
-            '${tanggal}' => $pengajuan->created_at?->format('d M Y H:i') ?? '-',
-            '{{tanggal}}' => $pengajuan->created_at?->format('d M Y H:i') ?? '-',
-            'Nama :' => 'Nama : ' . $pengajuan->nama,
-            'NIM :' => 'NIM : ' . $pengajuan->nim,
-            'Program Studi :' => 'Program Studi : ' . ($pengajuan->user?->prodi ?? '-'),
-            'Fakultas :' => 'Fakultas : ' . ($pengajuan->user?->fakultas ?? '-'),
-            'Semester :' => 'Semester : ' . $pengajuan->semester,
-            'Nama:' => 'Nama: ' . $pengajuan->nama,
-            'NIM:' => 'NIM: ' . $pengajuan->nim,
-            'Program Studi:' => 'Program Studi: ' . ($pengajuan->user?->prodi ?? '-'),
-            'Fakultas:' => 'Fakultas: ' . ($pengajuan->user?->fakultas ?? '-'),
-            'Semester:' => 'Semester: ' . $pengajuan->semester,
-        ];
-
-        $templateGenerated = false;
-        if ($templateId) {
-            $template = SuratTemplate::find($templateId);
-            if ($template && Storage::disk('public')->exists($template->file_path) && strtolower(pathinfo($template->file_path, PATHINFO_EXTENSION)) === 'docx') {
-                $templatePath = Storage::disk('public')->path($template->file_path);
-                try {
-                    $templateProcessor = new TemplateProcessor($templatePath);
-                    foreach ($placeholders as $key => $value) {
-                        if (str_starts_with($key, '${') || str_starts_with($key, '{{')) {
-                            $templateProcessor->setValue(trim($key, '${}'), $value);
-                        }
-                    }
-                    $templateProcessor->saveAs($outputPath);
-                    $templateGenerated = true;
-                } catch (\Exception $e) {
-                    // fallback below
-                }
-
-                if (! $templateGenerated) {
-                    $templateGenerated = $this->replaceDocxPlaceholders($templatePath, $outputPath, $placeholders);
-                }
-            }
-        }
-
-        if (! $templateGenerated) {
-            $phpWord = new PhpWord();
-            $section = $phpWord->addSection();
-            $section->addText($pengajuan->jenis_label, ['bold' => true, 'size' => 14]);
-            $section->addTextBreak(1);
-            $section->addText('Nama: ' . $pengajuan->nama);
-            $section->addText('NIM: ' . $pengajuan->nim);
-            $section->addText('Program Studi: ' . ($pengajuan->user?->prodi ?? '-'));
-            $section->addText('Fakultas: ' . ($pengajuan->user?->fakultas ?? '-'));
-            $section->addText('Semester: ' . $pengajuan->semester);
-            $section->addTextBreak(1);
-            $section->addText('Keterangan:');
-            if (!empty($generatedContent)) {
-                foreach (explode("\n", $generatedContent) as $line) {
-                    $section->addText(trim($line));
-                }
-            } else {
-                $section->addText($pengajuan->keterangan ?: '-');
-            }
-            $section->addTextBreak(1);
-            $section->addText('Status: ' . $pengajuan->status_label);
-            $section->addText('Tanggal Pengajuan: ' . ($pengajuan->created_at?->format('d M Y H:i') ?? '-'));
-
-            $writer = IOFactory::createWriter($phpWord, 'Word2007');
-            $writer->save($outputPath);
-        }
-
-        return 'generated-surat/' . $filename;
-    }
-
-    protected function replaceDocxPlaceholders(string $templatePath, string $outputPath, array $replace): bool
-    {
-        if (!copy($templatePath, $outputPath)) {
-            return false;
-        }
-
-        $zip = new \ZipArchive();
-        if ($zip->open($outputPath) !== true) {
-            return false;
-        }
-
-        $documentXml = $zip->getFromName('word/document.xml');
-        if ($documentXml === false) {
-            $zip->close();
-            return false;
-        }
-
-        $updatedXml = $documentXml;
-        foreach ($replace as $search => $replacement) {
-            $updatedXml = str_replace($search, htmlspecialchars($replacement, ENT_XML1 | ENT_COMPAT, 'UTF-8'), $updatedXml);
-        }
-
-        if ($updatedXml === $documentXml) {
-            $zip->close();
-            return false;
-        }
-
-        $zip->addFromString('word/document.xml', $updatedXml);
-        $zip->close();
-
-        return true;
-    }
-
-    /**
-     * Admin update pengajuan (edit semua field)
-     */
     public function adminUpdate(Request $request, $id)
     {
         $pengajuan = SuratPengajuan::findOrFail($id);
@@ -382,6 +118,11 @@ class SuratPengajuanController extends Controller
         }
 
         if ($request->filled('generated_content') || ($validated['status'] ?? null) === 'disetujui') {
+            if (empty($pengajuan->nomor_surat)) {
+                $pengajuan->nomor_surat = str_pad((string) random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+                $pengajuan->save();
+            }
+
             $templateId = $validated['template_id'] ?? null;
             $content = $request->input('generated_content', null);
             $filename = 'surat_pengajuan_' . $pengajuan->id . '_' . time() . '.docx';
@@ -398,14 +139,21 @@ class SuratPengajuanController extends Controller
                     try {
                         $templatePath = Storage::disk('public')->path($template->file_path);
                         $templateProcessor = new TemplateProcessor($templatePath);
-                        $templateProcessor->setValue('nama', $pengajuan->nama);
-                        $templateProcessor->setValue('nim', $pengajuan->nim);
-                        $templateProcessor->setValue('semester', $pengajuan->semester);
-                        $templateProcessor->setValue('prodi', $pengajuan->user?->prodi ?? '-');
-                        $templateProcessor->setValue('jenis', $pengajuan->jenis_label);
-                        $templateProcessor->setValue('keterangan', $pengajuan->keterangan ?? '-');
-                        $templateProcessor->setValue('status', $pengajuan->status_label);
-                        $templateProcessor->setValue('tanggal', $pengajuan->created_at?->format('d M Y H:i') ?? '-');
+                        $templateProcessor->setValue('nama', $this->docxSafe($pengajuan->nama));
+                        $templateProcessor->setValue('nim', $this->docxSafe($pengajuan->nim));
+                        $templateProcessor->setValue('semester', $this->docxSafe($pengajuan->semester));
+                        $templateProcessor->setValue('prodi', $this->docxSafe($pengajuan->user?->prodi ?? '-'));
+                        $templateProcessor->setValue('fakultas', $this->docxSafe($pengajuan->fakultas ?? $pengajuan->user?->fakultas ?? '-'));
+                        $templateProcessor->setValue('nomor', $this->docxSafe($pengajuan->nomor_surat ?? '-'));
+                        $templateProcessor->setValue('jenis', $this->docxSafe($pengajuan->jenis_label));
+                        $templateProcessor->setValue('keterangan', $this->docxSafe($pengajuan->keterangan ?? '-'));
+                        $templateProcessor->setValue('status', $this->docxSafe($pengajuan->status_label));
+                        $templateProcessor->setValue('tanggal', $this->docxSafe($pengajuan->created_at?->format('d M Y H:i') ?? '-'));
+                        $templateProcessor->setValue('pimpinan_instansi', $this->docxSafe($pengajuan->pimpinan_instansi ?? '-'));
+                        $templateProcessor->setValue('instansi', $this->docxSafe($pengajuan->instansi_tujuan ?? '-'));
+                        $templateProcessor->setValue('email', $this->docxSafe($pengajuan->email_mahasiswa ?? $pengajuan->user?->email ?? '-'));
+                        $templateProcessor->setValue('tanggal_mulai', $this->docxSafe($pengajuan->awal_magang ? Carbon::parse($pengajuan->awal_magang)->format('d M Y') : '-'));
+                        $templateProcessor->setValue('tanggal_selesai', $this->docxSafe($pengajuan->akhir_magang ? Carbon::parse($pengajuan->akhir_magang)->format('d M Y') : '-'));
                         $templateProcessor->saveAs($outputPath);
                         $templateGenerated = true;
                     } catch (\Exception $e) {
@@ -488,23 +236,6 @@ class SuratPengajuanController extends Controller
 
     /**
      * Hapus pengajuan milik mahasiswa yang sedang login.
-     */
-    public function destroy(SuratPengajuan $pengajuan)
-    {
-        abort_unless($pengajuan->user_id === Session::get('user_id'), 403);
-
-        if ($pengajuan->lampiran) {
-            Storage::disk('public')->delete($pengajuan->lampiran);
-        }
-
-        $pengajuan->delete();
-
-        return redirect()->route('mahasiswa.dashboard')
-            ->with('success', 'Pengajuan berhasil dihapus.');
-    }
-
-    /**
-     * Terima pengajuan (admin) - menggunakan redirect dengan session
      */
     public function terima(Request $request, $id)
     {
@@ -706,6 +437,11 @@ class SuratPengajuanController extends Controller
 
             // if approved, save generated file as .docx from selected template or fallback document
             if (($validated['status'] ?? '') === 'disetujui') {
+                if (empty($pengajuan->nomor_surat)) {
+                    $pengajuan->nomor_surat = str_pad((string) random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+                    $pengajuan->save();
+                }
+
                 $templateId = $validated['template_id'] ?? null;
                 $filename = 'surat_pengajuan_' . $pengajuan->id . '_' . time() . '.docx';
                 $generatedDir = Storage::disk('public')->path('generated-surat');
@@ -721,14 +457,21 @@ class SuratPengajuanController extends Controller
                         try {
                             $templatePath = Storage::disk('public')->path($template->file_path);
                             $templateProcessor = new TemplateProcessor($templatePath);
-                            $templateProcessor->setValue('nama', $pengajuan->nama);
-                            $templateProcessor->setValue('nim', $pengajuan->nim);
-                            $templateProcessor->setValue('semester', $pengajuan->semester);
-                            $templateProcessor->setValue('prodi', $pengajuan->user?->prodi ?? '-');
-                            $templateProcessor->setValue('jenis', $pengajuan->jenis_label);
-                            $templateProcessor->setValue('keterangan', $pengajuan->keterangan ?? '-');
-                            $templateProcessor->setValue('status', $pengajuan->status_label);
-                            $templateProcessor->setValue('tanggal', $pengajuan->created_at?->format('d M Y H:i') ?? '-');
+                            $templateProcessor->setValue('nama', $this->docxSafe($pengajuan->nama));
+                            $templateProcessor->setValue('nim', $this->docxSafe($pengajuan->nim));
+                            $templateProcessor->setValue('semester', $this->docxSafe($pengajuan->semester));
+                            $templateProcessor->setValue('prodi', $this->docxSafe($pengajuan->user?->prodi ?? '-'));
+                            $templateProcessor->setValue('fakultas', $this->docxSafe($pengajuan->fakultas ?? $pengajuan->user?->fakultas ?? '-'));
+                            $templateProcessor->setValue('nomor', $this->docxSafe($pengajuan->nomor_surat ?? '-'));
+                            $templateProcessor->setValue('jenis', $this->docxSafe($pengajuan->jenis_label));
+                            $templateProcessor->setValue('keterangan', $this->docxSafe($pengajuan->keterangan ?? '-'));
+                            $templateProcessor->setValue('status', $this->docxSafe($pengajuan->status_label));
+                            $templateProcessor->setValue('tanggal', $this->docxSafe($pengajuan->created_at?->format('d M Y H:i') ?? '-'));
+                            $templateProcessor->setValue('pimpinan_instansi', $this->docxSafe($pengajuan->pimpinan_instansi ?? '-'));
+                            $templateProcessor->setValue('instansi', $this->docxSafe($pengajuan->instansi_tujuan ?? '-'));
+                            $templateProcessor->setValue('email', $this->docxSafe($pengajuan->email_mahasiswa ?? $pengajuan->user?->email ?? '-'));
+                            $templateProcessor->setValue('tanggal_mulai', $this->docxSafe($pengajuan->awal_magang ? Carbon::parse($pengajuan->awal_magang)->format('d M Y') : '-'));
+                            $templateProcessor->setValue('tanggal_selesai', $this->docxSafe($pengajuan->akhir_magang ? Carbon::parse($pengajuan->akhir_magang)->format('d M Y') : '-'));
                             $templateProcessor->saveAs($outputPath);
                             $templateGenerated = true;
                         } catch (\Exception $e) {
