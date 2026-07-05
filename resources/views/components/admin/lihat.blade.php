@@ -186,11 +186,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
 </div>
-
-{{-- Include Komponen Lihat --}}
-@include('components.admin.lihat')
 
 <style>
     .action-btn {
