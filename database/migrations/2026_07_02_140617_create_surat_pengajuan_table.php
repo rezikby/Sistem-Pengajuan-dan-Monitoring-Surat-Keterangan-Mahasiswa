@@ -17,21 +17,21 @@ return new class extends Migration
 
             $table->enum('jenis', ['aktif', 'magang', 'rekomendasi']); // jenis surat yang diajukan
 
-            // 1. DATA FORM KHUSUS: SURAT AKTIF KULIAH
+            // 1. SURAT AKTIF KULIAH
             $table->string('nama');
             $table->string('nim');
             $table->string('semester');
             $table->text('keterangan')->nullable();
             $table->string('lampiran')->nullable(); 
 
-            // 2. DATA FORM KHUSUS: SURAT MAGANG
+            // 2. SURAT MAGANG
             $table->string('pimpinan_instansi')->nullable(); 
             $table->string('instansi_tujuan')->nullable();   
             $table->date('awal_magang')->nullable();         
             $table->date('akhir_magang')->nullable();        
             $table->string('email_mahasiswa')->nullable();   
 
-            // 3. DATA FORM KHUSUS: SURAT REKOMENDASI
+            // 3. SURAT REKOMENDASI
             $table->string('nama_dosen')->nullable();        
             $table->string('nip_dosen')->nullable();          
             $table->string('jabatan_akademik')->nullable();   
