@@ -33,6 +33,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('siswa')->name('mahasiswa.')->group(function () {
     
+    // Landing Page Mahasiswa
+    Route::get('/landing', [SuratPengajuanController::class, 'landingPage'])
+        ->name('landing');
+
     // Dashboard Mahasiswa
     Route::get('/', [SuratPengajuanController::class, 'dashboard'])
         ->name('dashboard');

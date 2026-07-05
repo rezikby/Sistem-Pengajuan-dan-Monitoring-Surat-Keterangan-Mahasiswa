@@ -25,6 +25,19 @@ class SuratPengajuanController extends Controller
     }
 
     /**
+     * Tampilkan landing page mahasiswa
+     */
+    public function landingPage()
+    {
+        $userId = Session::get('user_id');
+        $user = User::find($userId);
+
+        return view('dashboard.mahasiswa.LandingPage', [
+            'user' => $user,
+        ]);
+    }
+
+    /**
      * Tampilkan dashboard mahasiswa dengan riwayat pengajuan
      */
     public function dashboard()

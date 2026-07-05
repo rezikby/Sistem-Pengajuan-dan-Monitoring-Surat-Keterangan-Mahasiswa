@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Layanan Surat Mahasiswa - Polman Babel</title>
-  @vite(['resources/css/app.css'])
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <script>
@@ -27,37 +27,8 @@
 
 <body class="h-full min-h-screen bg-slate-50 font-sans antialiased flex flex-col justify-between">
 
-  {{-- Topbar / Navigation --}}
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-800 to-slate-500 flex items-center justify-center shrink-0 shadow-sm">
-          <i class="bi bi-mortarboard-fill text-white text-xl"></i>
-        </div>
-        <div class="leading-tight">
-          <p class="text-slate-900 font-bold text-sm tracking-wide">PORTAL LAYANAN SURAT</p>
-          <p class="text-polman-blue font-semibold text-xs uppercase tracking-wider">Polman Babel</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <div class="text-right hidden sm:block">
-          <p class="text-sm font-semibold text-slate-800">{{ $user->name ?? 'Mahasiswa' }}</p>
-          <p class="text-xs text-slate-500 font-medium">{{ $user->fakultas ?? '-' }} | {{ $user->prodi ?? '-' }} | {{ $user->nim ?? '-' }}</p>
-        </div>
-        <div class="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold">
-          <i class="bi bi-person-fill"></i>
-        </div>
-        <form method="POST" action="{{ route('logout') }}" class="border-l pl-3 border-slate-200">
-          @csrf
-          <button type="submit" class="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-red-600 transition-colors">
-            <i class="bi bi-box-arrow-right text-sm"></i>
-            <span class="hidden sm:inline">Keluar</span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </header>
+  {{-- Navbar Komponen --}}
+  <x-mahasiswa.navbar :user="$user" />
 
   {{-- Hero Section ala Landing Page Kampus Polman --}}
   <section class="bg-polman-blue text-white shadow-md relative overflow-hidden">
@@ -130,7 +101,7 @@
             </div>
             <h3 class="font-bold text-slate-900 text-base mb-1.5 group-hover:text-polman-blue transition-colors">Surat Permohonan Magang / KP</h3>
             <p class="text-xs text-slate-500 leading-relaxed mb-6">
-              Diajukan untuk pemenuhan kewajiban kurikulum dan peningkatan keterampilan mahasiswa ke Instansi/Perusahaan tujuan magang[cite: 5, 12].
+              Diajukan untuk pemenuhan kewajiban kurikulum dan peningkatan keterampilan mahasiswa ke Instansi/Perusahaan tujuan magang.
             </p>
           </div>
           <span class="inline-flex items-center gap-1.5 text-xs font-bold text-polman-blue mt-auto group-hover:gap-2.5 transition-all">
@@ -147,7 +118,7 @@
             </div>
             <h3 class="font-bold text-slate-900 text-base mb-1.5 group-hover:text-slate-700 transition-colors">Surat Rekomendasi Akademik</h3>
             <p class="text-xs text-slate-500 leading-relaxed mb-6">
-              Diberikan oleh Dosen/Kaprodi berdasarkan capaian akademik untuk keperluan beasiswa, lomba, atau kegiatan eksternal lainnya[cite: 25, 28, 29].
+              Diberikan oleh Dosen/Kaprodi berdasarkan capaian akademik untuk keperluan beasiswa, lomba, atau kegiatan eksternal lainnya.
             </p>
           </div>
           <span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 mt-auto group-hover:gap-2.5 transition-all">
@@ -253,5 +224,8 @@
   <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400 w-full mt-12">
     &copy; 2026 Politeknik Manufaktur Negeri Bangka Belitung. Hak Cipta Dilindungi Undang-Undang.
   </footer>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
