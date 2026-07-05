@@ -19,13 +19,15 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        //mahasiswa
+        // mahasiswa
         User::create([
             'name'      => 'REZI',
             'nim'       => '1062554',
             'password'  => Hash::make('230107Rezi'),
             'role'      => 'mahasiswa',
             'is_active' => true,
+            'fakultas'  => 'Informatika & Bisnis',
+            'prodi'     => 'Teknologi Rekayasa Perangkat Lunak',
         ]);
     }
 }

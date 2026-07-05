@@ -42,7 +42,7 @@
       <div class="flex items-center gap-4">
         <div class="text-right hidden sm:block">
           <p class="text-sm font-medium text-slate-800">{{ $user->name ?? 'Mahasiswa' }}</p>
-          <p class="text-xs text-slate-400">NIM {{ $user->nim ?? '-' }}</p>
+          <p class="text-xs text-slate-400">{{ $user->fakultas ?? '-' }} | {{ $user->prodi ?? '-' }} | {{ $user->nim ?? '-' }}</p>
         </div>
         <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
           <i class="bi bi-person-fill"></i>
@@ -143,6 +143,53 @@
       </div>
     </section>
 
+    {{-- Statistik Pengajuan --}}
+    <section class="mb-10">
+      <h2 class="text-base font-semibold text-slate-800 mb-4">Statistik Pengajuan Anda</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        {{-- Total --}}
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Total Pengajuan</p>
+              <p class="text-2xl font-bold text-slate-800 mt-1">{{ $statistik['total'] ?? 0 }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+          </div>
+        </div>
+
+        {{-- Pending --}}
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Pending</p>
+              <p class="text-2xl font-bold text-amber-600 mt-1">{{ $statistik['pending'] ?? 0 }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
+              <i class="bi bi-clock-history"></i>
+            </div>
+          </div>
+        </div>
+
+        {{-- Disetujui --}}
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Disetujui</p>
+              <p class="text-2xl font-bold text-green-600 mt-1">{{ $statistik['disetujui'] ?? 0 }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
+              <i class="bi bi-check-circle"></i>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     {{-- Riwayat Pengajuan --}}
     <section>
       <div class="flex items-center justify-between mb-4">
@@ -207,7 +254,7 @@
                     {{ $item->status_label }}
                   </span>
                 </td>
-                <td class="px-5 py-3.5">
+                    <td class="px-5 py-3.5">
                   <div class="flex items-center gap-1.5">
                     @if($item->status === 'pending' || $item->status === 'ditolak')
                     <a href="{{ route('mahasiswa.pengajuan.edit', $item->id) }}" 
@@ -226,7 +273,13 @@
                       </button>
                     </form>
                     @else
-                    <span class="text-xs text-slate-400">-</span>
+                      @if($item->status === 'disetujui')
+                        <a href="{{ route('mahasiswa.pengajuan.download', $item->id) }}" title="Unduh Surat" download class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition">
+                            <i class="bi bi-download"></i>
+                        </a>
+                      @else
+                        <span class="text-xs text-slate-400">-</span>
+                      @endif
                     @endif
                   </div>
                 </td>

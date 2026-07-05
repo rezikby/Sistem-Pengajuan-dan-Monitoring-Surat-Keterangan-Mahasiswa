@@ -223,7 +223,7 @@
                 x-collapse
                 class="ml-8 mt-0.5 space-y-0.5 border-l border-blue-800 pl-3 overflow-hidden">
                 <a href="{{ route('admin.surat.akademik') }}" class="block px-2 py-1.5 rounded-md whitespace-nowrap {{ request()->routeIs('admin.surat.akademik') ? 'text-blue-400' : 'hover:text-white' }}">Surat Akademik</a>
-                <a href="{{ route('admin.surat.template') }}" class="block px-2 py-1.5 rounded-md whitespace-nowrap {{ request()->routeIs('admin.surat.template') ? 'text-blue-400' : 'hover:text-white' }}">Template</a>
+                <a href="{{ route('admin.surat.template.index') }}" class="block px-2 py-1.5 rounded-md whitespace-nowrap {{ request()->routeIs('admin.surat.template.*') ? 'text-blue-400' : 'hover:text-white' }}">Template</a>
             </div>
         </div>
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\SuratTemplateController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Mahasiswa\SuratPengajuanController;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,9 @@ Route::prefix('siswa')->name('mahasiswa.')->group(function () {
 
     Route::delete('/pengajuan/{pengajuan}', [SuratPengajuanController::class, 'destroy'])
         ->name('pengajuan.destroy');
+
+    // Download generated surat for owner
+    Route::get('/pengajuan/{id}/download', [SuratPengajuanController::class, 'downloadForStudent'])->name('pengajuan.download');
 });
 
 // ========================
@@ -73,10 +77,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route Pengajuan - menggunakan POST untuk form submit
     Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
         Route::get('/', [SuratPengajuanController::class, 'get'])->name('index');
+        Route::get('/{id}', [SuratPengajuanController::class, 'show'])->name('show');
+        Route::get('/chart', [SuratPengajuanController::class, 'chartData'])->name('chart');
+        Route::put('/{id}', [SuratPengajuanController::class, 'update'])->name('update');
+        Route::put('/{id}/admin-update', [SuratPengajuanController::class, 'adminUpdate'])->name('admin.update');
+        Route::put('/{id}/status', [SuratPengajuanController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/{id}/download', [SuratPengajuanController::class, 'downloadGenerated'])->name('downloadGenerated');
         
         // Terima dan Tolak menggunakan POST dengan form
         Route::post('/{id}/terima', [SuratPengajuanController::class, 'terima'])->name('terima');
         Route::post('/{id}/tolak', [SuratPengajuanController::class, 'tolak'])->name('tolak');
+        Route::delete('/{id}', [SuratPengajuanController::class, 'adminDestroy'])->name('destroy');
     });
 
     // Akademik
@@ -133,7 +144,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Surat
     Route::prefix('surat')->name('surat.')->group(function () {
         Route::get('akademik', fn() => view('dashboard.admin.coming-soon'))->name('akademik');
-        Route::get('template', fn() => view('dashboard.admin.coming-soon'))->name('template');
+        Route::get('template', [SuratTemplateController::class, 'index'])->name('template.index');
+        Route::get('template/list', [SuratTemplateController::class, 'listJson'])->name('template.list');
+        Route::post('template', [SuratTemplateController::class, 'store'])->name('template.store');
+        Route::put('template/{template}', [SuratTemplateController::class, 'update'])->name('template.update');
+        Route::delete('template/{template}', [SuratTemplateController::class, 'destroy'])->name('template.destroy');
+        Route::get('template/{template}/download', [SuratTemplateController::class, 'download'])->name('template.download');
     });
 
     Route::get('pengumuman', fn() => view('dashboard.admin.coming-soon'))->name('pengumuman');
