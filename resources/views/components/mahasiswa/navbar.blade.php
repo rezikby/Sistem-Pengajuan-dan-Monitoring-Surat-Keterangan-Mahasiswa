@@ -26,14 +26,18 @@
         <div class="flex items-center justify-between h-16">
 
             {{-- Brand / Logo --}}
-            <div class="flex items-center gap-3 shrink-0">
-                <!-- ganti jadi logo polman babel -->
-                <!-- <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shadow-md">
-                    <i class="bi bi-mortarboard-fill text-white text-lg"></i>
-                </div> -->
+            <div class="flex items-center gap-3 shrink-0" style="display: flex !important; align-items: center !important;">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden"
+                    style="width: 36px !important; height: 36px !important; min-width: 36px !important; max-width: 36px !important; min-height: 36px !important; max-height: 36px !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 4px !important;">
+
+                    <img src="{{ asset('img/logo_polman.png') }}"
+                        alt="Logo POLMAN"
+                        style="width: auto !important; height: auto !important; max-width: 100% !important; max-height: 100% !important; object-fit: contain !important; display: block !important;">
+                </div>
+
                 <div class="leading-tight">
                     <p class="text-white font-semibold text-sm">SIAKAD</p>
-                    <p class="text-blue-200 text-xs hidden sm:block">Sistem Akademik</p>
+                    <p class="text-blue-200 text-xs hidden sm:block">Polman Babel</p>
                 </div>
             </div>
 
@@ -47,17 +51,17 @@
 
                 {{-- Akademik Dropdown --}}
                 <div class="relative group">
-                    <button @click="dropdownAkademik = !dropdownAkademik; akademikLeft = $el.getBoundingClientRect().left" 
+                    <button @click="dropdownAkademik = !dropdownAkademik; akademikLeft = $el.getBoundingClientRect().left"
                         class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap text-white/80">
                         <i class="bi bi-mortarboard text-base"></i>
                         <span>Akademik</span>
                         <i class="bi bi-chevron-down text-xs transition-transform" :class="dropdownAkademik ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="dropdownAkademik" 
-                         @click.away="dropdownAkademik = false"
-                         x-transition
-                         class="fixed shadow-xl py-1 min-w-[200px] border z-50"
-                         :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${akademikLeft}px;`">
+                    <div x-show="dropdownAkademik"
+                        @click.away="dropdownAkademik = false"
+                        x-transition
+                        class="fixed shadow-xl py-1 min-w-[200px] border z-50"
+                        :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${akademikLeft}px;`">
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Kalender Akademik</a>
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Jadwal</a>
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Kelas</a>
@@ -67,17 +71,17 @@
 
                 {{-- Mahasiswa Dropdown --}}
                 <div class="relative group">
-                    <button @click="dropdownMahasiswa = !dropdownMahasiswa; mahasiswaLeft = $el.getBoundingClientRect().left" 
+                    <button @click="dropdownMahasiswa = !dropdownMahasiswa; mahasiswaLeft = $el.getBoundingClientRect().left"
                         class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap text-white/80">
                         <i class="bi bi-person-badge text-base"></i>
                         <span>Mahasiswa</span>
                         <i class="bi bi-chevron-down text-xs transition-transform" :class="dropdownMahasiswa ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="dropdownMahasiswa" 
-                         @click.away="dropdownMahasiswa = false"
-                         x-transition
-                         class="fixed shadow-xl py-1 min-w-[200px] border z-50"
-                         :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${mahasiswaLeft}px;`">
+                    <div x-show="dropdownMahasiswa"
+                        @click.away="dropdownMahasiswa = false"
+                        x-transition
+                        class="fixed shadow-xl py-1 min-w-[200px] border z-50"
+                        :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${mahasiswaLeft}px;`">
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Data Mahasiswa</a>
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Status Mahasiswa</a>
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Import Data</a>
@@ -86,17 +90,17 @@
 
                 {{-- Mata Kuliah Dropdown --}}
                 <div class="relative group">
-                    <button @click="dropdownMatkul = !dropdownMatkul; matkulLeft = $el.getBoundingClientRect().left" 
+                    <button @click="dropdownMatkul = !dropdownMatkul; matkulLeft = $el.getBoundingClientRect().left"
                         class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap text-white/80">
                         <i class="bi bi-book text-base"></i>
                         <span>Mata Kuliah</span>
                         <i class="bi bi-chevron-down text-xs transition-transform" :class="dropdownMatkul ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="dropdownMatkul" 
-                         @click.away="dropdownMatkul = false"
-                         x-transition
-                         class="fixed shadow-xl py-1 min-w-[200px] border z-50"
-                         :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${matkulLeft}px;`">
+                    <div x-show="dropdownMatkul"
+                        @click.away="dropdownMatkul = false"
+                        x-transition
+                        class="fixed shadow-xl py-1 min-w-[200px] border z-50"
+                        :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${matkulLeft}px;`">
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Mata Kuliah</a>
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Kurikulum</a>
                         <a href="#" class="block px-4 py-2 text-sm text-white/70">Program Studi</a>
@@ -105,17 +109,17 @@
 
                 {{-- KRS Dropdown --}}
                 <div class="relative group">
-                    <button @click="dropdownKrs = !dropdownKrs; krsLeft = $el.getBoundingClientRect().left" 
+                    <button @click="dropdownKrs = !dropdownKrs; krsLeft = $el.getBoundingClientRect().left"
                         class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap text-white/80">
                         <i class="bi bi-journal-text text-base"></i>
                         <span>KRS</span>
                         <i class="bi bi-chevron-down text-xs transition-transform" :class="dropdownKrs ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="dropdownKrs" 
-                         @click.away="dropdownKrs = false"
-                         x-transition
-                         class="fixed shadow-xl py-1 min-w-[200px] border z-50"
-                         :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${krsLeft}px;`">
+                    <div x-show="dropdownKrs"
+                        @click.away="dropdownKrs = false"
+                        x-transition
+                        class="fixed shadow-xl py-1 min-w-[200px] border z-50"
+                        :style="`background-color: #304C81; border-color: rgba(255,255,255,0.1); top: 64px; left: ${krsLeft}px;`">
 
                         <a href="{{ route('mahasiswa.dashboard') }}" class="block px-4 py-2 text-sm text-white/70">Pengajuan</a>
                         <a href="{{ route('mahasiswa.riwayat') }}" class="block px-4 py-2 text-sm text-white/70">Riwayat</a>
@@ -166,9 +170,9 @@
 
         {{-- Mobile Menu --}}
         <div x-show="isMobileMenuOpen"
-             x-transition
-             class="lg:hidden py-4 border-t space-y-1"
-             style="border-color: rgba(255,255,255,0.1);">
+            x-transition
+            class="lg:hidden py-4 border-t space-y-1"
+            style="border-color: rgba(255,255,255,0.1);">
 
             {{-- Dashboard --}}
             <a href="{{ route('mahasiswa.landing') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-white/80">

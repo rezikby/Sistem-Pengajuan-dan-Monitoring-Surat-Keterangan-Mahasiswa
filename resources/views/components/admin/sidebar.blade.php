@@ -29,8 +29,10 @@
 
         {{-- Area Logo --}}
         <div class="flex items-center gap-3 min-w-0">
-            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0 shadow-md">
-                <i class="bi bi-mortarboard-fill text-white text-lg"></i>
+            <div class="w-11 h-11 bg-white rounded-xl shadow-md flex items-center justify-center shrink-0 p-1">
+                <img src="{{ asset('img/logo_polman.png') }}"
+                    alt="Logo POLMAN"
+                    class="w-9 h-9 object-contain">
             </div>
             {{-- Teks SIAKAD tersembunyi pas mengecil, tapi logonya aman tetep ada --}}
             <div class="leading-tight whitespace-nowrap" x-show="!isCondensed">

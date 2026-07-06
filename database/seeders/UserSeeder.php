@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
         // mahasiswa
         User::create([
             'name'      => 'REZI',
-            'nim'       => '1062554',
+            'nim'       => 'cc',
             'password'  => Hash::make('230107Rezi'),
             'role'      => 'mahasiswa',
             'is_active' => true,
