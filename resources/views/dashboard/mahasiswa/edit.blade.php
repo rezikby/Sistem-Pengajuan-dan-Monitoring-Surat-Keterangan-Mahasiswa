@@ -30,7 +30,7 @@
   {{-- Header --}}
   <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
     <div class="max-w-3xl mx-auto px-6 h-16 flex items-center gap-4">
-      <a href="{{ route('mahasiswa.dashboard') }}" class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition">
+      <a href="{{ route('mahasiswa.aktif.dashboard') }}" class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition">
         <i class="bi bi-arrow-left text-lg"></i>
       </a>
       <div class="leading-tight">
@@ -52,7 +52,7 @@
       </div>
 
       {{-- Form Kirim --}}
-      <form action="{{ route('mahasiswa.pengajuan.update', $pengajuan->id) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
+      <form action="{{ route('mahasiswa.' . $pengajuan->jenis . '.update', $pengajuan->id) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
         @csrf
         @method('PUT')
 
@@ -213,7 +213,7 @@
 
         {{-- Form Actions --}}
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-          <a href="{{ route('mahasiswa.dashboard') }}"
+           <a href="{{ route('mahasiswa.aktif.dashboard') }}"
              class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100 transition text-center">
             Batal
           </a>
